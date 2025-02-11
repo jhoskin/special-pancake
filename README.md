@@ -136,11 +136,67 @@ The service uses BoltDB for data persistence. The database file will be automati
 
 ## Testing
 
-Run the tests with:
+The project includes integration tests that use a temporary database file.
+
+### Prerequisites
+
+Install the testify package for assertions and test organization:
+
+```bash
+go get github.com/stretchr/testify
+```
+
+### Running Tests
+
+Here are different ways to run the tests:
+
+1. Run all tests:
 
 ```bash
 go test ./...
 ```
+
+2. Run tests for a specific package:
+
+```bash
+go test ./internal/features/listtodos
+go test ./internal/features/createtodo
+go test ./internal/features/updatetodo
+go test ./internal/features/deletetodo
+```
+
+3. Run tests with verbose output:
+
+```bash
+go test -v ./...
+```
+
+4. Run a specific test:
+
+```bash
+go test -v ./internal/features/listtodos -run TestListTodosHandler_Integration
+```
+
+5. Run tests with coverage:
+
+```bash
+go test -cover ./...
+```
+
+6. Generate a coverage report:
+
+```bash
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out  # Opens coverage report in browser
+```
+
+### Test Structure
+
+The tests use:
+
+- Temporary database files that are cleaned up after each test
+- Integration tests that verify the full flow of operations
+- Testify for assertions and test organization
 
 ## Contributing
 
