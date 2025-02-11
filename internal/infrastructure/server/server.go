@@ -18,6 +18,7 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
+// Server handles HTTP requests and manages todo operations
 type Server struct {
 	listtodos  *listtodos.Handler
 	createtodo *createtodo.Handler
@@ -25,6 +26,7 @@ type Server struct {
 	deletetodo *deletetodo.Handler
 }
 
+// NewServer creates a new Server instance with the given database
 func NewServer(db *db.BoltDB) *Server {
 	return &Server{
 		listtodos:  listtodos.NewHandler(db),
@@ -54,6 +56,7 @@ func (s *Server) DeleteTodo(ctx context.Context, req *connect.Request[todov1.Del
 	return s.deletetodo.Handle(ctx, req)
 }
 
+// Start begins listening for HTTP requests on the specified address
 func (s *Server) Start(addr string) error {
 	path, handler := todov1connect.NewTodoServiceHandler(s)
 	mux := http.NewServeMux()
