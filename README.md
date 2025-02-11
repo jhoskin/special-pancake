@@ -7,8 +7,9 @@ A simple and efficient Todo management service implemented in Go with gRPC.
 ```
 .
 ├── internal/
-│   ├── common/
-│   │   └── db/          # Database implementation using BoltDB
+│   ├── infrastructure/
+│   │   ├── db/          # Database implementation using BoltDB
+│   │   └── server/      # HTTP server and gRPC handlers
 │   └── features/
 │       ├── listtodos/   # List todos handler
 │       ├── createtodo/  # Create todo handler
@@ -67,6 +68,21 @@ source ~/.zshrc  # or source ~/.bash_profile
 
 ## Getting Started
 
+### Configuration
+
+The service can be configured using environment variables:
+
+| Variable | Description               | Default       |
+| -------- | ------------------------- | ------------- |
+| DB_PATH  | Path to the database file | data/todos.db |
+| PORT     | Port to listen on         | 8080          |
+
+Example:
+
+```bash
+DB_PATH=/var/lib/todo-service/data/todos.db PORT=3000 ./todo-service
+```
+
 1. Clone the repository:
 
 ```bash
@@ -106,106 +122,64 @@ buf generate
 
 ### API Reference
 
-The service exposes the following gRPC endpoints:
+The service exposes the following HTTP endpoints:
 
 #### TodoService
 
-- `ListTodos`: Retrieve all todos
-- `CreateTodo`: Create a new todo
-- `UpdateTodo`: Update an existing todo
-- `DeleteTodo`: Delete a todo by ID
+##### ListTodos
+
+```bash
+curl \
+  -X POST \
+  -H "Content-Type: application/json" \
+  http://localhost:8080/todo.v1.TodoService/ListTodos
+```
+
+##### CreateTodo
+
+```bash
+curl \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+  "title": "Buy groceries",
+  "description": "Milk, bread, eggs",
+  "completed": false
+}' \
+  http://localhost:8080/todo.v1.TodoService/CreateTodo
+```
+
+##### UpdateTodo
+
+```bash
+curl \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+  "id": 1,
+  "title": "Buy groceries",
+  "description": "Milk, bread, eggs, cheese",
+  "completed": true
+}' \
+  http://localhost:8080/todo.v1.TodoService/UpdateTodo
+```
+
+##### DeleteTodo
+
+```bash
+curl \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d '{
+  "id": 1
+}' \
+  http://localhost:8080/todo.v1.TodoService/DeleteTodo
+```
 
 ### Data Model
 
 Todo structure:
 
-```go
-type Todo struct {
-    ID          uint
-    Title       string
-    Description string
-    Completed   bool
-    CreatedAt   time.Time
-    UpdatedAt   time.Time
-}
 ```
 
-### Database
-
-The service uses BoltDB for data persistence. The database file will be automatically created in the configured location when the service starts.
-
-## Testing
-
-The project includes integration tests that use a temporary database file.
-
-### Prerequisites
-
-Install the testify package for assertions and test organization:
-
-```bash
-go get github.com/stretchr/testify
 ```
-
-### Running Tests
-
-Here are different ways to run the tests:
-
-1. Run all tests:
-
-```bash
-go test ./...
-```
-
-2. Run tests for a specific package:
-
-```bash
-go test ./internal/features/listtodos
-go test ./internal/features/createtodo
-go test ./internal/features/updatetodo
-go test ./internal/features/deletetodo
-```
-
-3. Run tests with verbose output:
-
-```bash
-go test -v ./...
-```
-
-4. Run a specific test:
-
-```bash
-go test -v ./internal/features/listtodos -run TestListTodosHandler_Integration
-```
-
-5. Run tests with coverage:
-
-```bash
-go test -cover ./...
-```
-
-6. Generate a coverage report:
-
-```bash
-go test -coverprofile=coverage.out ./...
-go tool cover -html=coverage.out  # Opens coverage report in browser
-```
-
-### Test Structure
-
-The tests use:
-
-- Temporary database files that are cleaned up after each test
-- Integration tests that verify the full flow of operations
-- Testify for assertions and test organization
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/common/db"
 	"todo-app/internal/features/createtodo"
 	"todo-app/internal/features/listtodos"
+	"todo-app/internal/infrastructure/db"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/stretchr/testify/assert"

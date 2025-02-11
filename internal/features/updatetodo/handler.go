@@ -6,7 +6,7 @@ import (
 	"time"
 
 	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/common/db"
+	"todo-app/internal/infrastructure/db"
 	"todo-app/models"
 
 	"github.com/bufbuild/connect-go"

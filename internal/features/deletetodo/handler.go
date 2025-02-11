@@ -4,7 +4,7 @@ import (
 	"context"
 
 	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/common/db"
+	"todo-app/internal/infrastructure/db"
 
 	"github.com/bufbuild/connect-go"
 	"go.etcd.io/bbolt"
