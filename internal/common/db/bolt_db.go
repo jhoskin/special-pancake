@@ -3,6 +3,8 @@ package db
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
 	"time"
 
 	"todo-app/models"
@@ -17,6 +19,12 @@ type BoltDB struct {
 }
 
 func NewBoltDB(path string) (*BoltDB, error) {
+	// Create the directory if it doesn't exist
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return nil, fmt.Errorf("could not create database directory: %v", err)
+	}
+
 	db, err := bbolt.Open(path, 0600, &bbolt.Options{Timeout: 1 * time.Second})
 	if err != nil {
 		return nil, fmt.Errorf("could not open db: %v", err)
