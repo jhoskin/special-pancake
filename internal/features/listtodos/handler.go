@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 
 	todov1 "todo-app/gen/proto/todo/v1"
+	"todo-app/internal/domain"
 	"todo-app/internal/infrastructure/db"
-	"todo-app/models"
 
 	"github.com/bufbuild/connect-go"
 	"go.etcd.io/bbolt"
@@ -47,13 +47,13 @@ func (h *Handler) Handle(
 	}), nil
 }
 
-func (h *Handler) getAllTodos() ([]models.Todo, error) {
-	var todos []models.Todo
+func (h *Handler) getAllTodos() ([]domain.Todo, error) {
+	var todos []domain.Todo
 
 	err := h.db.View(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket(db.TodoBucket)
 		return bucket.ForEach(func(k, v []byte) error {
-			var todo models.Todo
+			var todo domain.Todo
 			if err := json.Unmarshal(v, &todo); err != nil {
 				return err
 			}

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	todov1 "todo-app/gen/proto/todo/v1"
+	"todo-app/internal/domain"
 	"todo-app/internal/infrastructure/db"
-	"todo-app/models"
 
 	"github.com/bufbuild/connect-go"
 	"go.etcd.io/bbolt"
@@ -27,7 +27,7 @@ func (h *Handler) Handle(
 	req *connect.Request[todov1.CreateTodoRequest],
 ) (*connect.Response[todov1.CreateTodoResponse], error) {
 	now := time.Now()
-	todo := models.Todo{
+	todo := domain.Todo{
 		Title:       req.Msg.Title,
 		Description: req.Msg.Description,
 		Completed:   req.Msg.Completed,
@@ -51,7 +51,7 @@ func (h *Handler) Handle(
 	}), nil
 }
 
-func (h *Handler) addTodo(todo *models.Todo) error {
+func (h *Handler) addTodo(todo *domain.Todo) error {
 	return h.db.Update(func(tx *bbolt.Tx) error {
 		bucket := tx.Bucket(db.TodoBucket)
 
