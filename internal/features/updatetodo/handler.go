@@ -2,6 +2,7 @@ package updatetodo
 
 import (
 	"context"
+	"encoding/json"
 	"time"
 
 	todov1 "todo-app/gen/proto/todo/v1"
@@ -9,6 +10,7 @@ import (
 	"todo-app/models"
 
 	"github.com/bufbuild/connect-go"
+	"go.etcd.io/bbolt"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -32,7 +34,7 @@ func (h *Handler) Handle(
 		UpdatedAt:   time.Now(),
 	}
 
-	if err := h.db.UpdateTodo(todo); err != nil {
+	if err := h.updateTodo(&todo); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
@@ -45,4 +47,17 @@ func (h *Handler) Handle(
 			UpdatedAt:   timestamppb.New(todo.UpdatedAt),
 		},
 	}), nil
+}
+
+func (h *Handler) updateTodo(todo *models.Todo) error {
+	return h.db.Update(func(tx *bbolt.Tx) error {
+		bucket := tx.Bucket(db.TodoBucket)
+
+		buf, err := json.Marshal(todo)
+		if err != nil {
+			return err
+		}
+
+		return bucket.Put(db.Itob(todo.ID), buf)
+	})
 }

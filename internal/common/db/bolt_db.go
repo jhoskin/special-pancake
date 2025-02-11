@@ -1,18 +1,15 @@
 package db
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
 
-	"todo-app/models"
-
 	"go.etcd.io/bbolt"
 )
 
-var todoBucket = []byte("todos")
+var TodoBucket = []byte("todos")
 
 type BoltDB struct {
 	db *bbolt.DB
@@ -32,7 +29,7 @@ func NewBoltDB(path string) (*BoltDB, error) {
 
 	// Create the bucket if it doesn't exist
 	err = db.Update(func(tx *bbolt.Tx) error {
-		_, err := tx.CreateBucketIfNotExists(todoBucket)
+		_, err := tx.CreateBucketIfNotExists(TodoBucket)
 		return err
 	})
 	if err != nil {
@@ -46,66 +43,17 @@ func (b *BoltDB) Close() error {
 	return b.db.Close()
 }
 
-func (b *BoltDB) GetAllTodos() ([]models.Todo, error) {
-	var todos []models.Todo
-
-	err := b.db.View(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket(todoBucket)
-		return bucket.ForEach(func(k, v []byte) error {
-			var todo models.Todo
-			if err := json.Unmarshal(v, &todo); err != nil {
-				return err
-			}
-			todos = append(todos, todo)
-			return nil
-		})
-	})
-
-	return todos, err
+// View executes a read-only transaction
+func (b *BoltDB) View(fn func(*bbolt.Tx) error) error {
+	return b.db.View(fn)
 }
 
-func (b *BoltDB) AddTodo(todo models.Todo) error {
-	return b.db.Update(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket(todoBucket)
-
-		// Auto-increment ID
-		id, _ := bucket.NextSequence()
-		todo.ID = uint(id)
-
-		buf, err := json.Marshal(todo)
-		if err != nil {
-			return err
-		}
-
-		return bucket.Put(itob(todo.ID), buf)
-	})
+// Update executes a writable transaction
+func (b *BoltDB) Update(fn func(*bbolt.Tx) error) error {
+	return b.db.Update(fn)
 }
 
-func (b *BoltDB) UpdateTodo(todo models.Todo) error {
-	return b.db.Update(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket(todoBucket)
-
-		buf, err := json.Marshal(todo)
-		if err != nil {
-			return err
-		}
-
-		return bucket.Put(itob(todo.ID), buf)
-	})
-}
-
-func (b *BoltDB) DeleteTodo(id uint) error {
-	return b.db.Update(func(tx *bbolt.Tx) error {
-		bucket := tx.Bucket(todoBucket)
-		return bucket.Delete(itob(id))
-	})
-}
-
-// itob converts an ID to a byte slice
-func itob(v uint) []byte {
-	b := make([]byte, 8)
-	for i := uint(0); i < 8; i++ {
-		b[i] = byte(v >> (i * 8))
-	}
-	return b
+// Begin starts a new transaction
+func (b *BoltDB) Begin(writable bool) (*bbolt.Tx, error) {
+	return b.db.Begin(writable)
 }
