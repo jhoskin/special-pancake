@@ -23,3 +23,25 @@ go.work.sum
 
 # env file
 .env
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment files
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Binary output directory
+bin/
+dist/
+
+# Logs
+*.log
+
+# Database files
+*.db
