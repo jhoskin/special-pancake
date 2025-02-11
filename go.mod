@@ -1,4 +1,4 @@
-module todo-app
+module github.com/jhoskin/special-pancake
 
 go 1.21
 

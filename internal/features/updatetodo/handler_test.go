@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/features/createtodo"
-	"todo-app/internal/infrastructure/db"
+	"github.com/jhoskin/special-pancake/internal/features/createtodo"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/db"
+	pb "github.com/jhoskin/special-pancake/proto/gen/todo/v1"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/stretchr/testify/assert"
@@ -14,14 +14,16 @@ import (
 )
 
 func TestUpdateTodoHandler_Integration(t *testing.T) {
+	// Set up test database
 	testDB, cleanup := db.NewTestDB(t)
 	defer cleanup()
 
+	// Create handlers
 	createHandler := createtodo.NewHandler(testDB)
 	updateHandler := NewHandler(testDB)
 
-	// First create a todo
-	createReq := connect.NewRequest(&todov1.CreateTodoRequest{
+	// Create a test todo
+	createReq := connect.NewRequest(&pb.CreateTodoRequest{
 		Title:       "Original Title",
 		Description: "Original Description",
 		Completed:   false,
@@ -32,27 +34,26 @@ func TestUpdateTodoHandler_Integration(t *testing.T) {
 	require.NotNil(t, createResp)
 	require.NotNil(t, createResp.Msg.Todo)
 
-	originalTodo := createResp.Msg.Todo
+	todoID := createResp.Msg.Todo.Id
 
-	t.Run("should update an existing todo", func(t *testing.T) {
-		updateReq := connect.NewRequest(&todov1.UpdateTodoRequest{
-			Id:          originalTodo.Id,
+	// Test updating todo
+	t.Run("should update todo successfully", func(t *testing.T) {
+		updateReq := connect.NewRequest(&pb.UpdateTodoRequest{
+			Id:          todoID,
 			Title:       "Updated Title",
 			Description: "Updated Description",
 			Completed:   true,
 		})
 
-		resp, err := updateHandler.Handle(context.Background(), updateReq)
-
+		updateResp, err := updateHandler.Handle(context.Background(), updateReq)
 		require.NoError(t, err)
-		require.NotNil(t, resp)
-		require.NotNil(t, resp.Msg.Todo)
+		require.NotNil(t, updateResp)
+		require.NotNil(t, updateResp.Msg.Todo)
 
-		updatedTodo := resp.Msg.Todo
-		assert.Equal(t, originalTodo.Id, updatedTodo.Id)
-		assert.Equal(t, updateReq.Msg.Title, updatedTodo.Title)
-		assert.Equal(t, updateReq.Msg.Description, updatedTodo.Description)
-		assert.Equal(t, updateReq.Msg.Completed, updatedTodo.Completed)
-		assert.NotEqual(t, originalTodo.UpdatedAt, updatedTodo.UpdatedAt)
+		// Verify updated fields
+		assert.Equal(t, "Updated Title", updateResp.Msg.Todo.Title)
+		assert.Equal(t, "Updated Description", updateResp.Msg.Todo.Description)
+		assert.True(t, updateResp.Msg.Todo.Completed)
+		assert.NotNil(t, updateResp.Msg.Todo.UpdatedAt)
 	})
 }

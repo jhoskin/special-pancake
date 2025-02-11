@@ -7,17 +7,22 @@ A simple and efficient Todo management service implemented in Go with gRPC.
 ```
 .
 ├── internal/
+│   ├── domain/         # Domain models and interfaces
 │   ├── infrastructure/
-│   │   ├── db/          # Database implementation using BoltDB
-│   │   └── server/      # HTTP server and gRPC handlers
+│   │   ├── config/     # Application configuration
+│   │   ├── db/        # Database implementation using BoltDB
+│   │   └── server/    # HTTP server and gRPC handlers
 │   └── features/
-│       ├── listtodos/   # List todos handler
-│       ├── createtodo/  # Create todo handler
-│       ├── updatetodo/  # Update todo handler
-│       └── deletetodo/  # Delete todo handler
-├── models/              # Data models
-├── proto/              # Protocol Buffers definitions
-└── main.go            # Application entry point
+│       ├── listtodos/  # List todos handler
+│       ├── createtodo/ # Create todo handler
+│       ├── updatetodo/ # Update todo handler
+│       └── deletetodo/ # Delete todo handler
+├── proto/             # Protocol Buffers definitions
+│   ├── gen/          # Generated protobuf code
+│   └── todo/         # Todo service proto definitions
+├── go.mod            # Go module definition
+├── go.sum            # Go module checksums
+└── main.go           # Application entry point
 ```
 
 ## Features
@@ -32,39 +37,6 @@ A simple and efficient Todo management service implemented in Go with gRPC.
 - Go 1.21 or higher
 - Protocol Buffers compiler (protoc)
 - Buf CLI tool for protocol buffer management
-
-### Installing Go on macOS
-
-1. Install Homebrew if you haven't already:
-
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-2. Install Go using Homebrew:
-
-```bash
-brew install go
-```
-
-3. Verify the installation:
-
-```bash
-go version
-```
-
-4. Set up your Go workspace (add to ~/.zshrc or ~/.bash_profile):
-
-```bash
-export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
-```
-
-5. Reload your shell configuration:
-
-```bash
-source ~/.zshrc  # or source ~/.bash_profile
-```
 
 ## Getting Started
 
@@ -83,42 +55,33 @@ Example:
 DB_PATH=/var/lib/todo-service/data/todos.db PORT=3000 ./todo-service
 ```
 
-1. Clone the repository:
+### Building for Production
+
+For production deployments, you can create optimized builds for different architectures:
 
 ```bash
-git clone <repository-url>
-cd todo-service
+# Build for Linux AMD64 (most common)
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o todo-service-linux-amd64
+
+# Build for Linux ARM64 (e.g., AWS Graviton)
+CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-w -s" -o todo-service-linux-arm64
+
+# Build for macOS Intel
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s" -o todo-service-darwin-amd64
+
+# Build for macOS Apple Silicon
+CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-w -s" -o todo-service-darwin-arm64
+
+# Build for Windows AMD64
+CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-w -s" -o todo-service-windows-amd64.exe
 ```
 
-2. Install dependencies:
+Build flags explained:
 
-```bash
-go mod download
-```
-
-3. Run the service:
-
-```bash
-go run main.go
-```
-
-## Development
-
-### Building the Project
-
-Build the binary with:
-
-```bash
-go build -o todo-service
-```
-
-### Generating Protocol Buffers
-
-To regenerate the Protocol Buffers code after making changes to the `.proto` files:
-
-```bash
-buf generate
-```
+- `CGO_ENABLED=0`: Creates a statically linked binary
+- `-ldflags="-w -s"`: Reduces binary size by removing debug information
+- `GOOS`: Sets the target operating system
+- `GOARCH`: Sets the target architecture
 
 ### API Reference
 
@@ -142,10 +105,10 @@ curl \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{
-  "title": "Buy groceries",
-  "description": "Milk, bread, eggs",
-  "completed": false
-}' \
+    "title": "Buy groceries",
+    "description": "Milk, bread, eggs",
+    "completed": false
+  }' \
   http://localhost:8080/todo.v1.TodoService/CreateTodo
 ```
 
@@ -156,11 +119,11 @@ curl \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{
-  "id": 1,
-  "title": "Buy groceries",
-  "description": "Milk, bread, eggs, cheese",
-  "completed": true
-}' \
+    "id": 1,
+    "title": "Buy groceries",
+    "description": "Milk, bread, eggs, cheese",
+    "completed": true
+  }' \
   http://localhost:8080/todo.v1.TodoService/UpdateTodo
 ```
 
@@ -171,15 +134,7 @@ curl \
   -X POST \
   -H "Content-Type: application/json" \
   -d '{
-  "id": 1
-}' \
+    "id": 1
+  }' \
   http://localhost:8080/todo.v1.TodoService/DeleteTodo
-```
-
-### Data Model
-
-Todo structure:
-
-```
-
 ```

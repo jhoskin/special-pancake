@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"time"
 
-	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/domain"
-	"todo-app/internal/infrastructure/db"
+	"github.com/jhoskin/special-pancake/internal/domain"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/db"
+	pb "github.com/jhoskin/special-pancake/proto/gen/todo/v1"
 
 	"github.com/bufbuild/connect-go"
 	"go.etcd.io/bbolt"
@@ -24,8 +24,8 @@ func NewHandler(db *db.BoltDB) *Handler {
 
 func (h *Handler) Handle(
 	ctx context.Context,
-	req *connect.Request[todov1.UpdateTodoRequest],
-) (*connect.Response[todov1.UpdateTodoResponse], error) {
+	req *connect.Request[pb.UpdateTodoRequest],
+) (*connect.Response[pb.UpdateTodoResponse], error) {
 	todo := domain.Todo{
 		ID:          uint(req.Msg.Id),
 		Title:       req.Msg.Title,
@@ -38,8 +38,8 @@ func (h *Handler) Handle(
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&todov1.UpdateTodoResponse{
-		Todo: &todov1.Todo{
+	return connect.NewResponse(&pb.UpdateTodoResponse{
+		Todo: &pb.Todo{
 			Id:          uint32(todo.ID),
 			Title:       todo.Title,
 			Description: todo.Description,

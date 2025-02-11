@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/features/createtodo"
-	"todo-app/internal/features/listtodos"
-	"todo-app/internal/infrastructure/db"
+	"github.com/jhoskin/special-pancake/internal/features/createtodo"
+	"github.com/jhoskin/special-pancake/internal/features/listtodos"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/db"
+	pb "github.com/jhoskin/special-pancake/proto/gen/todo/v1"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +23,7 @@ func TestDeleteTodoHandler_Integration(t *testing.T) {
 	listHandler := listtodos.NewHandler(testDB)
 
 	// First create a todo
-	createReq := connect.NewRequest(&todov1.CreateTodoRequest{
+	createReq := connect.NewRequest(&pb.CreateTodoRequest{
 		Title:       "Test Todo",
 		Description: "Test Description",
 		Completed:   false,
@@ -37,7 +37,7 @@ func TestDeleteTodoHandler_Integration(t *testing.T) {
 	todoID := createResp.Msg.Todo.Id
 
 	t.Run("should delete an existing todo", func(t *testing.T) {
-		deleteReq := connect.NewRequest(&todov1.DeleteTodoRequest{
+		deleteReq := connect.NewRequest(&pb.DeleteTodoRequest{
 			Id: todoID,
 		})
 
@@ -48,7 +48,7 @@ func TestDeleteTodoHandler_Integration(t *testing.T) {
 		assert.True(t, resp.Msg.Success)
 
 		// Verify todo was deleted by listing todos
-		listReq := connect.NewRequest(&todov1.ListTodosRequest{})
+		listReq := connect.NewRequest(&pb.ListTodosRequest{})
 		listResp, err := listHandler.Handle(context.Background(), listReq)
 		require.NoError(t, err)
 		assert.Empty(t, listResp.Msg.Todos)

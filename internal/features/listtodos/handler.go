@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
-	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/domain"
-	"todo-app/internal/infrastructure/db"
+	"github.com/jhoskin/special-pancake/internal/domain"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/db"
+	pb "github.com/jhoskin/special-pancake/proto/gen/todo/v1"
 
 	"github.com/bufbuild/connect-go"
 	"go.etcd.io/bbolt"
@@ -23,16 +23,16 @@ func NewHandler(db *db.BoltDB) *Handler {
 
 func (h *Handler) Handle(
 	ctx context.Context,
-	req *connect.Request[todov1.ListTodosRequest],
-) (*connect.Response[todov1.ListTodosResponse], error) {
+	req *connect.Request[pb.ListTodosRequest],
+) (*connect.Response[pb.ListTodosResponse], error) {
 	todos, err := h.getAllTodos()
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	protoTodos := make([]*todov1.Todo, len(todos))
+	protoTodos := make([]*pb.Todo, len(todos))
 	for i, todo := range todos {
-		protoTodos[i] = &todov1.Todo{
+		protoTodos[i] = &pb.Todo{
 			Id:          uint32(todo.ID),
 			Title:       todo.Title,
 			Description: todo.Description,
@@ -42,7 +42,7 @@ func (h *Handler) Handle(
 		}
 	}
 
-	return connect.NewResponse(&todov1.ListTodosResponse{
+	return connect.NewResponse(&pb.ListTodosResponse{
 		Todos: protoTodos,
 	}), nil
 }

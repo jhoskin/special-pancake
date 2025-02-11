@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"todo-app/internal/infrastructure/config"
-	"todo-app/internal/infrastructure/db"
-	"todo-app/internal/infrastructure/server"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/config"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/db"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/server"
 )
 
 func main() {

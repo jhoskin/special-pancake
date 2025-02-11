@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/features/createtodo"
-	"todo-app/internal/infrastructure/db"
+	"github.com/jhoskin/special-pancake/internal/features/createtodo"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/db"
+	pb "github.com/jhoskin/special-pancake/proto/gen/todo/v1"
 
 	"github.com/bufbuild/connect-go"
 	"github.com/stretchr/testify/assert"
@@ -33,7 +33,7 @@ func TestListTodosHandler_Integration(t *testing.T) {
 	}
 
 	for _, todo := range todos {
-		req := connect.NewRequest(&todov1.CreateTodoRequest{
+		req := connect.NewRequest(&pb.CreateTodoRequest{
 			Title:       todo.title,
 			Description: todo.description,
 			Completed:   todo.completed,
@@ -47,7 +47,7 @@ func TestListTodosHandler_Integration(t *testing.T) {
 
 	// Test listing todos
 	t.Run("should list all todos", func(t *testing.T) {
-		req := connect.NewRequest(&todov1.ListTodosRequest{})
+		req := connect.NewRequest(&pb.ListTodosRequest{})
 		resp, err := listHandler.Handle(context.Background(), req)
 
 		require.NoError(t, err)

@@ -3,8 +3,8 @@ package deletetodo
 import (
 	"context"
 
-	todov1 "todo-app/gen/proto/todo/v1"
-	"todo-app/internal/infrastructure/db"
+	"github.com/jhoskin/special-pancake/internal/infrastructure/db"
+	pb "github.com/jhoskin/special-pancake/proto/gen/todo/v1"
 
 	"github.com/bufbuild/connect-go"
 	"go.etcd.io/bbolt"
@@ -20,13 +20,13 @@ func NewHandler(db *db.BoltDB) *Handler {
 
 func (h *Handler) Handle(
 	ctx context.Context,
-	req *connect.Request[todov1.DeleteTodoRequest],
-) (*connect.Response[todov1.DeleteTodoResponse], error) {
+	req *connect.Request[pb.DeleteTodoRequest],
+) (*connect.Response[pb.DeleteTodoResponse], error) {
 	if err := h.deleteTodo(uint(req.Msg.Id)); err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
 
-	return connect.NewResponse(&todov1.DeleteTodoResponse{
+	return connect.NewResponse(&pb.DeleteTodoResponse{
 		Success: true,
 	}), nil
 }
